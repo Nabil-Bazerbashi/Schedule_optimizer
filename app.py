@@ -10,6 +10,7 @@ import matplotlib.patches as mpatches
 import streamlit as st
 from playwright.sync_api import sync_playwright
 import asyncio
+import traceback
 
 
 # Install playwright browsers on first run
@@ -346,7 +347,8 @@ if submitted:
                 all_sections = scrape(user_id, password)
             except Exception as e:
                 # Clean, user-friendly error message hiding technical details
-                st.error("Login failed or system unavailable. Please check your University ID and Password, and ensure the university portal is online.")
+                error_trace = traceback.format_exc()
+                st.error(f"Cloud Debug Error:\n\n{error_trace}")
                 st.stop()
 
         with st.spinner("Finding best schedule..."):
