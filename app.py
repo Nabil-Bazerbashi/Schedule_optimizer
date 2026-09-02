@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 import streamlit as st
 from playwright.sync_api import sync_playwright
 import asyncio
-import traceback
+
 
 # Install playwright browsers on first run
 @st.cache_resource
