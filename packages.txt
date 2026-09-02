@@ -5,7 +5,6 @@ libcairo2
 libcups2
 libdrm2
 libgbm1
-libglib2.0-0
 libnss3
 libpango-1.0-0
 libpangocairo-1.0-0
