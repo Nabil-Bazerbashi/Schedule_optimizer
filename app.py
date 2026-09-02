@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import streamlit as st
 from playwright.sync_api import sync_playwright
+import asyncio
+import traceback
 
 # Install playwright browsers on first run
 @st.cache_resource
@@ -76,6 +78,14 @@ def parse_time(time_str):
 #  SCRAPE
 # ─────────────────────────────────────────────
 def scrape(user_id, password):
+    # --- WINDOWS STREAMLIT FIX ---
+    if sys.platform.startswith('win'):
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    
+    new_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(new_loop)
+    # -----------------------------
+
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         context = browser.new_context()
@@ -302,31 +312,41 @@ def draw_schedule(sections):
 # ─────────────────────────────────────────────
 #  STREAMLIT UI
 # ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+#  STREAMLIT UI
+# ─────────────────────────────────────────────
 st.set_page_config(page_title="Schedule Optimizer", page_icon="📅", layout="wide")
 st.title("📅 Schedule Optimizer")
 st.markdown("Automatically finds the best schedule with maximum free days and minimum break time.")
-
-
-user_id = "4510163"
-password = "ZXCVbnm,.1"
+st.warning("⚠️ Important: This tool only finds the most optimized schedule for the courses you enter. You are responsible for enrolling in the courses.")
 
 with st.form("schedule_form"):
+    # Add input fields for User ID and Password
+    user_id = st.text_input("University ID", placeholder="e.g. 4510163")
+    password = st.text_input("Password", type="password", placeholder="Enter your password")
+    
     user_input = st.text_input(
         "Course codes (comma separated)",
         placeholder="e.g. STAT 232, MATH 101, CS 141"
     )
     submitted = st.form_submit_button("🔍 Generate Schedule", use_container_width=True)
+st.markdown(""" 💬Having a problem or a suggestion?  \n📧 **4510163@upm.edu.sa** """)
+
 if submitted:
-    if not user_input:
+    # Check if ID and password were provided
+    if not user_id or not password:
+        st.error("Please enter both your University ID and Password.")
+    elif not user_input:
         st.error("Please enter at least one course code.")
     else:
         wanted_courses = [c.strip().upper() for c in user_input.split(",")]
 
-        with st.spinner("...لحظات الإنتظار إملأها بالإستغفار"):
+        with st.spinner("Finding courses data..."):
             try:
                 all_sections = scrape(user_id, password)
             except Exception as e:
-                st.error(f"Login failed or scraping error: {e}")
+                # Clean, user-friendly error message hiding technical details
+                st.error("Login failed or system unavailable. Please check your University ID and Password, and ensure the university portal is online.")
                 st.stop()
 
         with st.spinner("Finding best schedule..."):
