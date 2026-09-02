@@ -21,3 +21,4 @@ libxrandr2
 libxrender1
 libxshmfence1
 libxslt1.1
+libxkbcommon0
